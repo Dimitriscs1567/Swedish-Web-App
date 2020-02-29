@@ -30,7 +30,14 @@ function App() {
 
   const toShow = state.words.length === 0 
                   ? <div>'loading'</div> 
-                  : <Question word={state.words[0]}></Question>;
+                  : <Question 
+                      otherWords={[
+                        state.words[1],
+                        state.words[2],
+                        state.words[3],
+                        state.words[4],
+                      ]}
+                      word={state.words[0]} />;
 
   return (
     <div>{toShow}</div>
