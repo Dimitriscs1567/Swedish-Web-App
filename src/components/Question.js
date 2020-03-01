@@ -1,10 +1,7 @@
 import React, {useState} from 'react'
 import { Grid, Radio, Form } from 'semantic-ui-react';
-import useWindowDimensions from '../custom_hooks/UseWindowDimensions'
 
 const Question = (props) => {
-
-    const {width, height} = useWindowDimensions();
 
     const [state, setState] = useState({
         value: ''
@@ -12,7 +9,7 @@ const Question = (props) => {
 
     const handleChange = (e, { value }) => setState({ value: value })
 
-    const radioButtons = props.otherWords.map(word => {
+    const radioButtons = props.question.words.map(word => {
         return (
             <Form.Field>
                 <Radio
@@ -27,13 +24,15 @@ const Question = (props) => {
         )
     });
 
+
+    const rightWord = props.question.words[props.question.rightWord];
     return (
-        <Grid style={{height: height}}>
+        <Grid>
             <Grid.Row centered>
                 <Grid.Column 
                     verticalAlign='bottom'
                     style={{fontSize: '2.2em'}}>
-                    What {props.word.word} means?
+                    What {rightWord.word} means?
                 </Grid.Column>
             </Grid.Row>
             <Grid.Row centered>
@@ -41,16 +40,6 @@ const Question = (props) => {
                     verticalAlign='top'
                     textAlign='center' >
                     <Form>
-                        <Form.Field>
-                            <Radio
-                                style={{fontSize: '1.5em'}}
-                                key={props.word.id}
-                                label={props.word.translation}
-                                name='radioGroup'
-                                value={props.word.id.toString()}
-                                checked={state.value === props.word.id.toString()}
-                                onChange={handleChange} />
-                        </Form.Field>
                         {radioButtons}
                     </Form>
                 </Grid.Column>
