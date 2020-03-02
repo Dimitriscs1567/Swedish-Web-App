@@ -1,13 +1,7 @@
-import React, {useState} from 'react'
+import React from 'react'
 import { Grid, Radio, Form } from 'semantic-ui-react';
 
 const Question = (props) => {
-
-    const [state, setState] = useState({
-        value: ''
-    });
-
-    const handleChange = (e, { value }) => setState({ value: value })
 
     const radioButtons = props.question.words.map(word => {
         return (
@@ -18,14 +12,16 @@ const Question = (props) => {
                     label={word.translation}
                     name='radioGroup'
                     value={word.id.toString()}
-                    checked={state.value === word.id.toString()}
-                    onChange={handleChange} />
+                    checked={props.selectedValue === word.id.toString()}
+                    onChange={props.handleChange} />
             </Form.Field>
         )
     });
 
+    const rightWord = props.question.words.filter(word=>{
+        return word.id === props.question.rightWord
+    })[0];
 
-    const rightWord = props.question.words[props.question.rightWord];
     return (
         <Grid>
             <Grid.Row centered>
