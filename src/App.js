@@ -21,7 +21,7 @@ function App() {
 
   const nextQuestion = () => {
     const rightId = state.test[state.questionToShow].rightWord;
-    const rightAnswer = rightId == state.selectedValue;
+    const rightAnswer = rightId.toString() === state.selectedValue;
     
     setState((prevState) => {
       return {
@@ -54,7 +54,7 @@ function App() {
     const tempTest = [];
 
     for(let i=0; i<20; i++){
-      const wordsForQuestion = findNext(words);
+      const wordsForQuestion = findNext(words, tempTest);
       const question = {
         words: wordsForQuestion,
         rightWord: wordsForQuestion[Math.floor(Math.random() * wordsForQuestion.length)].id
@@ -72,15 +72,20 @@ function App() {
     });
   }
 
-  const findNext = (words)=>{
+  const findNext = (words, test)=>{
     let wordsForQuestion = [];
+    let translations = []
+    const alreadyUsed = test.map(question => question.rightWord.toString())
 
-    for(let i=0; i<5; i++){
+    for(let i=0; i<6; i++){
       let next = Math.floor(Math.random() * words.length);
-      while(wordsForQuestion.includes(words[next])){
+      while(wordsForQuestion.includes(words[next]) || translations.includes(words[next].translation 
+        || alreadyUsed.includes(words[next].id.toString()))){
+
         next = Math.floor(Math.random() * words.length);
       }
       wordsForQuestion.push(words[next]);
+      translations.push(words[next].translation);
     }
     
     return wordsForQuestion;
