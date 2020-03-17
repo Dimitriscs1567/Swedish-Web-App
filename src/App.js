@@ -4,6 +4,7 @@ import axios from 'axios';
 import Question from './components/Question';
 import { Grid, Button } from 'semantic-ui-react';
 import useWindowDimensions from './custom_hooks/UseWindowDimensions';
+import createTest from './utils/TestUtils'
 
 function App() {
 
@@ -14,7 +15,8 @@ function App() {
     test: [],
     questionToShow: -1,
     right: 0,
-    selectedValue: -1
+    selectedValue: -1,
+    answered: -1
   });
 
   const handleChange = (e, { value }) => setState({...state, selectedValue: value });
@@ -22,15 +24,22 @@ function App() {
   const nextQuestion = () => {
     const rightId = state.test[state.questionToShow].rightWord;
     const rightAnswer = rightId.toString() === state.selectedValue;
-    
-    setState((prevState) => {
-      return {
-        ...state,
-        questionToShow: prevState.questionToShow + 1,
-        selectedValue: -1,
-        right: rightAnswer ? prevState.right + 1 : prevState.right
-      }
+
+    setState((prevState)=>{ 
+      return {...state, answered: prevState.selectedValue};
     });
+
+    setTimeout(()=>{
+      setState((prevState) => {
+        return {
+          ...state,
+          questionToShow: prevState.questionToShow + 1,
+          selectedValue: -1,
+          answered: -1,
+          right: rightAnswer ? prevState.right + 1 : prevState.right
+        };
+      });
+    },3000);
   }
 
   useEffect(()=>{
@@ -40,7 +49,16 @@ function App() {
       axios.get("http://localhost:3000/api/v1/words",{
         headers: {Authorization: `Bearer ${response.data.token}`}
       }).then(response2 => {
-        createTest(response2.data._embedded.words);
+        const test = createTest(response2.data._embedded.words);
+
+        setState((prevState)=>{
+          return {
+            ...state,
+            words: response2.data._embedded.words,
+            test: test,
+            questionToShow: prevState.questionToShow + 1
+          }
+        });
       })
       .catch(error => {
         console.log(error)
@@ -49,47 +67,6 @@ function App() {
       console.log(error)
     });
   }, []);
-
-  const createTest = (words)=>{
-    const tempTest = [];
-
-    for(let i=0; i<20; i++){
-      const wordsForQuestion = findNext(words, tempTest);
-      const question = {
-        words: wordsForQuestion,
-        rightWord: wordsForQuestion[Math.floor(Math.random() * wordsForQuestion.length)].id
-      }
-      tempTest.push(question);
-    }
-
-    setState((prevState)=>{
-      return {
-        ...state,
-        words: words.slice(),
-        test: tempTest.slice(),
-        questionToShow: prevState.questionToShow + 1
-      }
-    });
-  }
-
-  const findNext = (words, test)=>{
-    let wordsForQuestion = [];
-    let translations = []
-    const alreadyUsed = test.map(question => question.rightWord.toString())
-
-    for(let i=0; i<6; i++){
-      let next = Math.floor(Math.random() * words.length);
-      while(wordsForQuestion.includes(words[next]) || translations.includes(words[next].translation 
-        || alreadyUsed.includes(words[next].id.toString()))){
-
-        next = Math.floor(Math.random() * words.length);
-      }
-      wordsForQuestion.push(words[next]);
-      translations.push(words[next].translation);
-    }
-    
-    return wordsForQuestion;
-  }
 
   const questionToAnswer = state.questionToShow < 0 
         ? <div>loading</div> 
@@ -104,12 +81,18 @@ function App() {
                 <Question 
                   question={state.test[state.questionToShow]} 
                   handleChange={handleChange}
-                  selectedValue={state.selectedValue}/>
+                  selectedValue={state.selectedValue}
+                  answered={state.answered}/>
               </Grid.Column>
             </Grid.Row>
             <Grid.Row>
               <Grid.Column verticalAlign='middle' textAlign='center'>
-                <Button onClick={nextQuestion} style={{minWidth: '200px'}} primary content='Next'/>
+                <Button 
+                  onClick={state.selectedValue > -1 ? nextQuestion : null} 
+                  style={{minWidth: '200px'}} 
+                  primary 
+                  content='Next'
+                  loading={state.answered > -1}/>
               </Grid.Column>
             </Grid.Row>
           </Grid>;
